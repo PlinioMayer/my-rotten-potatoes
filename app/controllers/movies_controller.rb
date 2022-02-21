@@ -7,8 +7,10 @@ class MoviesController < ApplicationController
       order = { params[:sort_by].to_sym => :asc }
     end
 
+    @ratings = params[:ratings] ? params[:ratings].keys : Movie.all_ratings
+    @all_ratings = Movie.all_ratings
     @hilitie = 'hilitie'
-    @movies = Movie.order(order)
+    @movies = Movie.where('rating in (:ratings)', ratings: @ratings).order(order)
   end
 
   def show
