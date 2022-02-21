@@ -1,7 +1,14 @@
 # This file is app/controllers/movies_controller.rb
 class MoviesController < ApplicationController
   def index
-    @movies = Movie.all
+    order = nil
+
+    if params[:sort_by] then
+      order = { params[:sort_by].to_sym => :asc }
+    end
+
+    @hilitie = 'hilitie'
+    @movies = Movie.order(order)
   end
 
   def show
