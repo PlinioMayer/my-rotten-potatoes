@@ -1,16 +1,29 @@
 # This file is app/controllers/movies_controller.rb
 class MoviesController < ApplicationController
   def index
-    order = nil
+    redirect = (session[:sort_by] && !params[:sort_by]) || (session[:ratings] && !params[:ratings])
 
-    if params[:sort_by] then
-      order = { params[:sort_by].to_sym => :asc }
+    if redirect then
+      flash.keep
+      redirect_to movies_path(
+                    sort_by: params[:sort_by] || session[:sort_by],
+                    ratings: params[:ratings] || session[:ratings]
+                  )
+    else
+      session[:sort_by] = params[:sort_by]
+      session[:ratings] = params[:ratings]
+
+      order = nil
+
+      if params[:sort_by] then
+        order = { params[:sort_by].to_sym => :asc }
+      end
+
+      @ratings = params[:ratings] ? params[:ratings].keys : Movie.all_ratings
+      @all_ratings = Movie.all_ratings
+      @hilitie = 'hilitie'
+      @movies = Movie.where('rating in (:ratings)', ratings: @ratings).order(order)
     end
-
-    @ratings = params[:ratings] ? params[:ratings].keys : Movie.all_ratings
-    @all_ratings = Movie.all_ratings
-    @hilitie = 'hilitie'
-    @movies = Movie.where('rating in (:ratings)', ratings: @ratings).order(order)
   end
 
   def show
@@ -30,7 +43,7 @@ class MoviesController < ApplicationController
   end
 
   def movie_params
-    params.require(:movie).permit(:title,:rating,:description,:release_date)
+    params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
 
   def edit
